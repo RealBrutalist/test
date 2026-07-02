@@ -75,7 +75,10 @@ input {
   position: relative;
   min-height: 100vh;
   display: grid;
+  grid-template-columns: minmax(0, 760px) auto;
+  gap: 18px;
   place-items: center;
+  justify-content: center;
   padding: 24px;
 }
 
@@ -281,22 +284,20 @@ h1 {
 }
 
 .mascot {
-  position: fixed;
-  right: max(18px, calc((100vw - 1060px) / 2));
-  bottom: 10px;
+  align-self: end;
   display: grid;
-  grid-template-columns: 42px 128px 42px;
+  grid-template-columns: 36px 64px 36px;
   align-items: end;
-  gap: 4px;
+  gap: 6px;
   pointer-events: none;
   filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.4));
 }
 
 .dancer {
-  width: 128px;
+  width: 64px;
   height: 192px;
   background-image: url("/assets/open-wire-dancer.webp");
-  background-size: 576px 192px;
+  background-size: 384px 192px;
   animation: dance 0.72s steps(6) infinite, bounce 1.44s ease-in-out infinite;
   transform-origin: 50% 100%;
 }
@@ -319,7 +320,7 @@ h1 {
 }
 
 @keyframes dance {
-  to { background-position-x: -576px; }
+  to { background-position-x: -384px; }
 }
 
 @keyframes bounce {
@@ -338,14 +339,15 @@ h1 {
 
 @media (max-width: 980px) {
   .mascot {
-    right: 10px;
     transform: scale(0.72);
-    transform-origin: bottom right;
+    transform-origin: bottom left;
   }
 }
 
 @media (max-width: 620px) {
   .shell {
+    display: grid;
+    grid-template-columns: 1fr;
     padding: 0;
   }
 
@@ -366,8 +368,10 @@ h1 {
   }
 
   .mascot {
+    position: fixed;
     opacity: 0.34;
     right: -34px;
+    bottom: 10px;
     transform: scale(0.52);
   }
 }
