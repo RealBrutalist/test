@@ -69,9 +69,26 @@ function send(payload) {
   }
 }
 
+function colorForName(name) {
+  let hash = 0;
+  for (const char of name) {
+    hash = ((hash << 5) - hash + char.charCodeAt(0)) | 0;
+  }
+  const hue = Math.abs(hash) % 360;
+  return {
+    accent: `hsl(${hue} 96% 66%)`,
+    soft: `hsl(${hue} 96% 66% / 0.18)`,
+    glow: `hsl(${hue} 96% 66% / 0.38)`
+  };
+}
+
 function renderMessage(item) {
   const node = template.content.firstElementChild.cloneNode(true);
+  const color = colorForName(item.name);
   node.classList.toggle("mine", item.name === myName);
+  node.style.setProperty("--message-accent", color.accent);
+  node.style.setProperty("--message-soft", color.soft);
+  node.style.setProperty("--message-glow", color.glow);
   node.querySelector("strong").textContent = item.name;
   node.querySelector("p").textContent = item.text;
 
