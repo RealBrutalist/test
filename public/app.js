@@ -9,7 +9,9 @@ const musicButton = document.querySelector("#music");
 const tracks = [
   { src: "/assets/hyper-glitter-dream.mp3", duration: 0 },
   { src: "/assets/glitchy-shiny-hearts.mp3", duration: 0 },
-  { src: "/assets/digital-heartbeat-burst.mp3", duration: 0 }
+  { src: "/assets/digital-heartbeat-burst.mp3", duration: 0 },
+  { src: "/assets/system-offline.mp3", duration: 0 },
+  { src: "/assets/digital-static-shards.mp3", duration: 0 }
 ];
 const musicTrack = new Audio(tracks[0].src);
 
