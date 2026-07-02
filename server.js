@@ -9,6 +9,16 @@ const port = process.env.PORT || 3000;
 
 const clients = new Map();
 const radioStart = Date.parse("2026-07-02T00:00:00.000Z");
+const radioTracks = shuffle([
+  "/assets/hyper-glitter-dream.mp3",
+  "/assets/glitchy-shiny-hearts.mp3",
+  "/assets/digital-heartbeat-burst.mp3",
+  "/assets/system-offline.mp3",
+  "/assets/digital-static-shards.mp3",
+  "/assets/digital-neural-flow.mp3",
+  "/assets/resonant-signal.mp3",
+  "/assets/dual-grid-signals.mp3"
+]);
 const roomLimit = 8;
 const rooms = [
   { id: "neon-lobby", name: "Neon Lobby", history: [] },
@@ -23,6 +33,15 @@ app.use(express.static("public"));
 
 function cleanText(value, maxLength) {
   return String(value ?? "").replace(/\s+/g, " ").trim().slice(0, maxLength);
+}
+
+function shuffle(items) {
+  const shuffled = [...items];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+  }
+  return shuffled;
 }
 
 function roomCount(roomId) {
@@ -95,7 +114,8 @@ wss.on("connection", (socket) => {
     history: room.history,
     radio: {
       start: radioStart,
-      serverTime: Date.now()
+      serverTime: Date.now(),
+      tracks: radioTracks
     }
   }));
   broadcastPresence();

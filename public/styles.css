@@ -124,15 +124,23 @@ input {
 .chaos-layer b:nth-child(11) { left: 80%; top: 74%; animation-delay: -0.9s; }
 .chaos-layer b:nth-child(12) { left: 28%; top: 84%; animation-delay: -2.7s; }
 
-.mini-dancer {
+.mini-dancer,
+.mini-left-dancer {
   position: absolute;
   width: 128px;
   height: 254px;
-  background-image: url("/assets/open-wire-dancer.webp");
   background-size: 768px 254px;
   opacity: 0.22;
   transform-origin: 50% 100%;
   animation: dance 0.72s steps(6) infinite, mini-float 4.8s ease-in-out infinite;
+}
+
+.mini-dancer {
+  background-image: url("/assets/open-wire-dancer.webp");
+}
+
+.mini-left-dancer {
+  background-image: url("/assets/open-wire-left-dancer.webp");
 }
 
 .mini-dancer-one {
@@ -153,6 +161,22 @@ input {
   top: 12vh;
   transform: scale(0.28) rotate(-8deg);
   animation-delay: -0.48s, -3.1s;
+}
+
+.mini-left-dancer-one {
+  left: 71vw;
+  top: 36vh;
+  opacity: 0.18;
+  transform: scale(0.32) rotate(-12deg);
+  animation-delay: -0.36s, -1.8s;
+}
+
+.mini-left-dancer-two {
+  left: 30vw;
+  bottom: -72px;
+  opacity: 0.2;
+  transform: scale(0.4) rotate(8deg);
+  animation-delay: -0.6s, -3.8s;
 }
 
 .shell {
@@ -420,9 +444,13 @@ h1 {
 
 .left-mascot {
   position: fixed;
-  right: min(calc(50% + 398px), calc(100vw - 160px));
+  right: min(calc(50% + 398px), calc(100vw - 226px));
   bottom: 28px;
   z-index: 4;
+  display: grid;
+  grid-template-columns: 36px 128px 36px;
+  align-items: end;
+  gap: 6px;
   pointer-events: none;
   filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.36));
 }
@@ -536,7 +564,7 @@ h1 {
   .left-mascot {
     transform: scale(0.72);
     transform-origin: bottom right;
-    right: min(calc(50% + 318px), calc(100vw - 118px));
+    right: min(calc(50% + 318px), calc(100vw - 166px));
   }
 }
 
@@ -580,7 +608,8 @@ h1 {
     display: none;
   }
 
-  .mini-dancer {
+  .mini-dancer,
+  .mini-left-dancer {
     display: none;
   }
 }

@@ -7,12 +7,15 @@ const statusDot = document.querySelector("#status-dot");
 const template = document.querySelector("#message-template");
 const musicButton = document.querySelector("#music");
 const roomSelect = document.querySelector("#room");
-const tracks = [
+let tracks = [
   { src: "/assets/hyper-glitter-dream.mp3", duration: 0 },
   { src: "/assets/glitchy-shiny-hearts.mp3", duration: 0 },
   { src: "/assets/digital-heartbeat-burst.mp3", duration: 0 },
   { src: "/assets/system-offline.mp3", duration: 0 },
-  { src: "/assets/digital-static-shards.mp3", duration: 0 }
+  { src: "/assets/digital-static-shards.mp3", duration: 0 },
+  { src: "/assets/digital-neural-flow.mp3", duration: 0 },
+  { src: "/assets/resonant-signal.mp3", duration: 0 },
+  { src: "/assets/dual-grid-signals.mp3", duration: 0 }
 ];
 const musicTrack = new Audio(tracks[0].src);
 
@@ -137,6 +140,12 @@ function connect() {
       if (data.radio) {
         radioStart = data.radio.start;
         serverOffset = data.radio.serverTime - Date.now();
+        if (Array.isArray(data.radio.tracks) && data.radio.tracks.length) {
+          tracks = data.radio.tracks.map((src) => ({ src, duration: 0 }));
+          loadTrackDurations().then(() => {
+            if (musicButton.getAttribute("aria-pressed") === "true") tuneRadio();
+          });
+        }
       }
 
       if (!myName) {
