@@ -65,13 +65,14 @@ function findRoom(id) {
   return rooms.find((room) => room.id === id) || rooms[0];
 }
 
-function quietestRoom() {
-  return rooms.reduce((best, room) => {
-    const count = roomCount(room.id);
-    const bestCount = roomCount(best.id);
-    if (count < bestCount) return room;
-    return best;
-  }, rooms[0]);
+function nextAggregatedRoom() {
+  return rooms.find((room) => roomCount(room.id) < roomLimit) || rooms[rooms.length - 1];
+}
+
+function openRoomFor(roomId) {
+  const room = findRoom(roomId);
+  if (roomCount(room.id) < roomLimit) return room;
+  return nextAggregatedRoom();
 }
 
 function broadcast(payload, roomId = null) {
@@ -102,7 +103,7 @@ function sendRoomState(socket, moved = false) {
 
 wss.on("connection", (socket) => {
   const guestName = `Guest ${Math.floor(1000 + Math.random() * 9000)}`;
-  const room = quietestRoom();
+  const room = nextAggregatedRoom();
   clients.set(socket, { name: guestName, roomId: room.id });
 
   socket.send(JSON.stringify({
@@ -139,7 +140,7 @@ wss.on("connection", (socket) => {
     if (data.type === "room") {
       const client = clients.get(socket);
       const previousRoom = client.roomId;
-      client.roomId = findRoom(data.roomId).id;
+      client.roomId = openRoomFor(data.roomId).id;
       if (previousRoom !== client.roomId) {
         sendRoomState(socket, true);
         broadcastPresence();
