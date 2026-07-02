@@ -22,6 +22,8 @@ let trackIndex = 0;
 let radioStart = Date.parse("2026-07-02T00:00:00.000Z");
 let serverOffset = 0;
 let radioTimer;
+let audioContext;
+let soundUnlocked = false;
 
 musicTrack.volume = 0.45;
 
@@ -51,6 +53,46 @@ function renderMessage(item) {
 
   messages.append(node);
   messages.scrollTop = messages.scrollHeight;
+}
+
+function unlockSound() {
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContext) return null;
+  audioContext ||= new AudioContext();
+  if (audioContext.state === "suspended") {
+    audioContext.resume();
+  }
+  soundUnlocked = true;
+  return audioContext;
+}
+
+function messageBlip(isMine = false) {
+  if (!soundUnlocked) return;
+  const context = unlockSound();
+  if (!context) return;
+
+  const now = context.currentTime;
+  const gain = context.createGain();
+  const primary = context.createOscillator();
+  const sparkle = context.createOscillator();
+
+  primary.type = "triangle";
+  sparkle.type = "sine";
+  primary.frequency.setValueAtTime(isMine ? 720 : 520, now);
+  primary.frequency.exponentialRampToValueAtTime(isMine ? 1180 : 860, now + 0.08);
+  sparkle.frequency.setValueAtTime(isMine ? 1440 : 1040, now + 0.025);
+
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(0.08, now + 0.015);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
+
+  primary.connect(gain);
+  sparkle.connect(gain);
+  gain.connect(context.destination);
+  primary.start(now);
+  sparkle.start(now + 0.025);
+  primary.stop(now + 0.17);
+  sparkle.stop(now + 0.13);
 }
 
 function connect() {
@@ -92,6 +134,7 @@ function connect() {
 
     if (data.type === "message") {
       renderMessage(data.message);
+      messageBlip(data.message.name === myName);
     }
   });
 
@@ -154,14 +197,23 @@ nameInput.addEventListener("change", () => {
 
 composer.addEventListener("submit", (event) => {
   event.preventDefault();
+  unlockSound();
   const text = messageInput.value.trim();
   if (!text) return;
+  composer.classList.remove("sending");
+  void composer.offsetWidth;
+  composer.classList.add("sending");
   send({ type: "message", text });
   messageInput.value = "";
   messageInput.focus();
 });
 
+composer.addEventListener("animationend", () => {
+  composer.classList.remove("sending");
+});
+
 function toggleMusic() {
+  unlockSound();
   const isOn = musicButton.getAttribute("aria-pressed") === "true";
   if (isOn) {
     clearInterval(radioTimer);
