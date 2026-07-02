@@ -3,14 +3,14 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Open Wire</title>
-    <meta name="description" content="A tiny public chat room with a dancing mascot, tiny synth loops, and whoever shows up.">
-    <meta property="og:title" content="Open Wire">
-    <meta property="og:description" content="A tiny public chat room with a dancing mascot, tiny synth loops, and whoever shows up.">
+    <title>Open Wire Radio</title>
+    <meta name="description" content="A tiny public chat room with dancing mascots, synchronized synth radio, and auto-splitting rooms.">
+    <meta property="og:title" content="Open Wire Radio">
+    <meta property="og:description" content="A tiny public chat room with dancing mascots, synchronized synth radio, and auto-splitting rooms.">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="Open Wire">
-    <meta name="twitter:description" content="A tiny public chat room with a dancing mascot, tiny synth loops, and whoever shows up.">
+    <meta name="twitter:title" content="Open Wire Radio">
+    <meta name="twitter:description" content="A tiny public chat room with dancing mascots, synchronized synth radio, and auto-splitting rooms.">
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body>
@@ -53,12 +53,16 @@
         <header class="topbar">
           <div>
             <p class="eyebrow">public live room</p>
-            <h1>Open Wire</h1>
-            <p class="tagline">Tiny room. Neon pulse. Whoever is here.</p>
+            <h1>Open Wire Radio</h1>
+            <p class="tagline">Tiny rooms. Shared neon radio. Whoever is here.</p>
             <p class="status-line"><span id="status-dot"></span><span id="status">Connecting</span></p>
           </div>
           <div class="controls">
             <button id="music" class="music-button" type="button" aria-pressed="false">Radio</button>
+            <label class="room-field">
+              <span>Room</span>
+              <select id="room"></select>
+            </label>
             <label class="name-field">
               <span>Name</span>
               <input id="name" autocomplete="nickname" maxlength="24">
@@ -73,6 +77,10 @@
           <button type="submit">Send</button>
         </form>
       </section>
+
+      <aside class="left-mascot" aria-hidden="true">
+        <div class="left-dancer"></div>
+      </aside>
 
       <aside class="mascot" aria-hidden="true">
         <div class="speaker speaker-left"></div>

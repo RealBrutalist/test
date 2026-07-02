@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: small-room-chat
+    name: open-wire-radio
     runtime: node
     plan: free
     buildCommand: npm install

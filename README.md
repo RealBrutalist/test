@@ -1,6 +1,6 @@
-# Small Room
+# Open Wire Radio
 
-A minimal public chat room built with Express and WebSockets.
+A chaotic little public chat room built with Express, WebSockets, synchronized radio, and auto-splitting rooms.
 
 ## Run locally for development
 

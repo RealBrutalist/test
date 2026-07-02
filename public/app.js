@@ -6,6 +6,7 @@ const statusText = document.querySelector("#status");
 const statusDot = document.querySelector("#status-dot");
 const template = document.querySelector("#message-template");
 const musicButton = document.querySelector("#music");
+const roomSelect = document.querySelector("#room");
 const tracks = [
   { src: "/assets/hyper-glitter-dream.mp3", duration: 0 },
   { src: "/assets/glitchy-shiny-hearts.mp3", duration: 0 },
@@ -24,6 +25,7 @@ let serverOffset = 0;
 let radioTimer;
 let audioContext;
 let soundUnlocked = false;
+let currentRoomId = "";
 
 musicTrack.volume = 0.45;
 
@@ -32,6 +34,30 @@ nameInput.value = myName;
 function setStatus(text, online = false) {
   statusText.textContent = text;
   statusDot.classList.toggle("online", online);
+}
+
+function renderRooms(rooms = []) {
+  const selected = roomSelect.value || currentRoomId;
+  roomSelect.replaceChildren(...rooms.map((room) => {
+    const option = document.createElement("option");
+    option.value = room.id;
+    option.textContent = `${room.name} (${room.count})`;
+    if (!room.roomy) option.textContent += " busy";
+    return option;
+  }));
+
+  if (rooms.some((room) => room.id === selected)) {
+    roomSelect.value = selected;
+  }
+}
+
+function enterRoom(data) {
+  currentRoomId = data.roomId;
+  renderRooms(data.rooms);
+  roomSelect.value = currentRoomId;
+  messages.replaceChildren();
+  data.history.forEach(renderMessage);
+  setStatus(data.moved ? `Moved to ${data.roomName}` : `${data.roomName}`, true);
 }
 
 function send(payload) {
@@ -118,8 +144,7 @@ function connect() {
         nameInput.value = myName;
         localStorage.setItem("chat-name", myName);
       }
-      messages.replaceChildren();
-      data.history.forEach(renderMessage);
+      enterRoom(data);
     }
 
     if (data.type === "renamed") {
@@ -129,7 +154,11 @@ function connect() {
     }
 
     if (data.type === "presence") {
-      setStatus(`${data.count} online`, true);
+      renderRooms(data.rooms);
+    }
+
+    if (data.type === "room") {
+      enterRoom(data);
     }
 
     if (data.type === "message") {
@@ -193,6 +222,10 @@ nameInput.addEventListener("change", () => {
   myName = nameInput.value.trim().slice(0, 24);
   localStorage.setItem("chat-name", myName);
   send({ type: "rename", name: myName });
+});
+
+roomSelect.addEventListener("change", () => {
+  send({ type: "room", roomId: roomSelect.value });
 });
 
 composer.addEventListener("submit", (event) => {
