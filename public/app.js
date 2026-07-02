@@ -1,0 +1,190 @@
+const messages = document.querySelector("#messages");
+const composer = document.querySelector("#composer");
+const messageInput = document.querySelector("#message");
+const nameInput = document.querySelector("#name");
+const statusText = document.querySelector("#status");
+const statusDot = document.querySelector("#status-dot");
+const template = document.querySelector("#message-template");
+const musicButton = document.querySelector("#music");
+const tracks = [
+  { src: "/assets/hyper-glitter-dream.mp3", duration: 0 },
+  { src: "/assets/glitchy-shiny-hearts.mp3", duration: 0 },
+  { src: "/assets/digital-heartbeat-burst.mp3", duration: 0 }
+];
+const musicTrack = new Audio(tracks[0].src);
+
+let socket;
+let myName = localStorage.getItem("chat-name") || "";
+let reconnectTimer;
+let trackIndex = 0;
+let radioStart = Date.parse("2026-07-02T00:00:00.000Z");
+let serverOffset = 0;
+let radioTimer;
+
+musicTrack.volume = 0.45;
+
+nameInput.value = myName;
+
+function setStatus(text, online = false) {
+  statusText.textContent = text;
+  statusDot.classList.toggle("online", online);
+}
+
+function send(payload) {
+  if (socket?.readyState === WebSocket.OPEN) {
+    socket.send(JSON.stringify(payload));
+  }
+}
+
+function renderMessage(item) {
+  const node = template.content.firstElementChild.cloneNode(true);
+  node.classList.toggle("mine", item.name === myName);
+  node.querySelector("strong").textContent = item.name;
+  node.querySelector("p").textContent = item.text;
+
+  const time = node.querySelector("time");
+  const date = new Date(item.time);
+  time.dateTime = item.time;
+  time.textContent = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+  messages.append(node);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function connect() {
+  const protocol = location.protocol === "https:" ? "wss" : "ws";
+  socket = new WebSocket(`${protocol}://${location.host}`);
+
+  socket.addEventListener("open", () => {
+    setStatus("Online", true);
+    if (myName) send({ type: "rename", name: myName });
+  });
+
+  socket.addEventListener("message", (event) => {
+    const data = JSON.parse(event.data);
+
+    if (data.type === "hello") {
+      if (data.radio) {
+        radioStart = data.radio.start;
+        serverOffset = data.radio.serverTime - Date.now();
+      }
+
+      if (!myName) {
+        myName = data.name;
+        nameInput.value = myName;
+        localStorage.setItem("chat-name", myName);
+      }
+      messages.replaceChildren();
+      data.history.forEach(renderMessage);
+    }
+
+    if (data.type === "renamed") {
+      myName = data.name;
+      nameInput.value = myName;
+      localStorage.setItem("chat-name", myName);
+    }
+
+    if (data.type === "presence") {
+      setStatus(`${data.count} online`, true);
+    }
+
+    if (data.type === "message") {
+      renderMessage(data.message);
+    }
+  });
+
+  socket.addEventListener("close", () => {
+    setStatus("Reconnecting");
+    clearTimeout(reconnectTimer);
+    reconnectTimer = setTimeout(connect, 1200);
+  });
+}
+
+async function loadTrackDurations() {
+  await Promise.all(tracks.map((track) => new Promise((resolve) => {
+    const probe = new Audio(track.src);
+    probe.preload = "metadata";
+    probe.addEventListener("loadedmetadata", () => {
+      track.duration = Number.isFinite(probe.duration) ? probe.duration : 0;
+      resolve();
+    }, { once: true });
+    probe.addEventListener("error", resolve, { once: true });
+  })));
+}
+
+function currentRadioPosition() {
+  const totalDuration = tracks.reduce((sum, track) => sum + track.duration, 0);
+  if (!totalDuration) return { index: 0, offset: 0 };
+
+  const stationNow = Date.now() + serverOffset;
+  let position = ((stationNow - radioStart) / 1000) % totalDuration;
+  if (position < 0) position += totalDuration;
+
+  for (let index = 0; index < tracks.length; index += 1) {
+    if (position < tracks[index].duration) {
+      return { index, offset: position };
+    }
+    position -= tracks[index].duration;
+  }
+
+  return { index: 0, offset: 0 };
+}
+
+function tuneRadio() {
+  const position = currentRadioPosition();
+  trackIndex = position.index;
+  const selected = tracks[trackIndex];
+
+  if (!musicTrack.src.endsWith(selected.src)) {
+    musicTrack.src = selected.src;
+  }
+
+  if (Math.abs(musicTrack.currentTime - position.offset) > 1.2) {
+    musicTrack.currentTime = Math.max(0, Math.min(position.offset, selected.duration - 0.25));
+  }
+}
+
+nameInput.addEventListener("change", () => {
+  myName = nameInput.value.trim().slice(0, 24);
+  localStorage.setItem("chat-name", myName);
+  send({ type: "rename", name: myName });
+});
+
+composer.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const text = messageInput.value.trim();
+  if (!text) return;
+  send({ type: "message", text });
+  messageInput.value = "";
+  messageInput.focus();
+});
+
+function toggleMusic() {
+  const isOn = musicButton.getAttribute("aria-pressed") === "true";
+  if (isOn) {
+    clearInterval(radioTimer);
+    musicTrack.pause();
+    musicButton.setAttribute("aria-pressed", "false");
+    musicButton.textContent = "Radio";
+    return;
+  }
+
+  tuneRadio();
+  musicTrack.play().then(() => {
+    clearInterval(radioTimer);
+    radioTimer = setInterval(tuneRadio, 5000);
+    musicButton.setAttribute("aria-pressed", "true");
+    musicButton.textContent = "Mute";
+  }).catch(() => {
+    musicButton.textContent = "Tap again";
+  });
+}
+
+musicButton.addEventListener("click", toggleMusic);
+musicTrack.addEventListener("ended", () => {
+  tuneRadio();
+  musicTrack.play();
+});
+
+loadTrackDurations();
+connect();

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Open Wire</title>
+    <meta name="description" content="A tiny public chat room with a dancing mascot, tiny synth loops, and whoever shows up.">
+    <meta property="og:title" content="Open Wire">
+    <meta property="og:description" content="A tiny public chat room with a dancing mascot, tiny synth loops, and whoever shows up.">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Open Wire">
+    <meta name="twitter:description" content="A tiny public chat room with a dancing mascot, tiny synth loops, and whoever shows up.">
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <div class="party-field" aria-hidden="true">
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <main class="shell" aria-label="Open Wire chat room">
+      <section class="chat-window">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">public live room</p>
+            <h1>Open Wire</h1>
+            <p class="tagline">Tiny room. Neon pulse. Whoever is here.</p>
+            <p class="status-line"><span id="status-dot"></span><span id="status">Connecting</span></p>
+          </div>
+          <div class="controls">
+            <button id="music" class="music-button" type="button" aria-pressed="false">Radio</button>
+            <label class="name-field">
+              <span>Name</span>
+              <input id="name" autocomplete="nickname" maxlength="24">
+            </label>
+          </div>
+        </header>
+
+        <ol id="messages" class="messages" aria-live="polite"></ol>
+
+        <form id="composer" class="composer">
+          <input id="message" autocomplete="off" maxlength="500" placeholder="Drop a line..." required>
+          <button type="submit">Send</button>
+        </form>
+      </section>
+
+      <aside class="mascot" aria-hidden="true">
+        <div class="speaker speaker-left"></div>
+        <div class="dancer"></div>
+        <div class="speaker speaker-right"></div>
+      </aside>
+    </main>
+
+    <template id="message-template">
+      <li class="message">
+        <div class="meta">
+          <strong></strong>
+          <time></time>
+        </div>
+        <p></p>
+      </li>
+    </template>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
